@@ -194,19 +194,8 @@ class MonetizationTest {
                         .getAllEntitlements(MonetizationTest.applicationId)
                         .filter(entitlementData -> entitlementData.id().asLong() == MonetizationTest.testEntitlementId);
 
-                // I don't know if I should expect nothing or an ended entitlement :(
-                // One of the two following verifiers will fail...
                 StepVerifier.create(entitlementFlux)
                         .expectNextCount(0)
-                        .expectComplete()
-                        .verify();
-
-                StepVerifier.create(entitlementFlux)
-                        .expectNextCount(1)
-                        .expectNextMatches(entitlementData -> {
-                            return !entitlementData.endsAt().isAbsent()
-                                    && DateTimeFormatter.ISO_OFFSET_DATE_TIME.parse(entitlementData.endsAt().get(), Instant::from).isBefore(Instant.now());
-                        })
                         .expectComplete()
                         .verify();
             }
@@ -323,7 +312,6 @@ class MonetizationTest {
                     .verifyTimeout(Duration.ofMinutes(5));
         }
 
-        // I'm not sure if deleting a test entitlement will trigger an ENTITLEMENT_DELETE event...
         @Test
         @Order(4)
         @DisplayName("Test ENTITLEMENT_DELETE event")
